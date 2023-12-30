@@ -9,40 +9,37 @@
 */
 package m_ext_pkg;
     //Typedefs
-    typedef enum bit [2:0] func3_t  {
-                                    MUL    = 3'b000,
-                                    MULH   = 3'b001,
-                                    MULHSU = 3'b010,
-                                    MULHU  = 3'b011,
-                                    DIV    = 3'b100,
-                                    DIVU   = 3'b101,
-                                    REM    = 3'b110,
-                                    REMU   = 3'b111,
-                                    eplrr0 = 3'b000,
-                                    eplrr1 = 3'b001,
-                                    eplrr2 = 3'b010
-                                    };
-    typedef enum bit [6:0] func7_t  {
-                                    MULDIV = 7'b0000001;
-                                    CUSTOM_Istr = 7'b0000000;
-                                    };
-    typedef enum bit [1:0] custom_inst_t{
-                                    eplrr0 = 3'b000,
-                                    eplrr1 = 3'b001,
-                                    eplrr2 = 3'b010
-                                    };
+    typedef enum logic [2:0] {
+                            MUL    = 3'b000,
+                            MULH   = 3'b001,
+                            MULHSU = 3'b010,
+                            MULHU  = 3'b011,
+                            DIV    = 3'b100,
+                            DIVU   = 3'b101,
+                            REM    = 3'b110,
+                            REMU   = 3'b111
+                            } func3_t;
+    typedef enum logic [6:0] {
+                            MULDIV = 7'b0000001,
+                            CUSTOM_Istr = 7'b0000000
+                            } func7_t;
+    typedef enum logic [2:0]{
+                            eplrr0 = 3'b000,
+                            eplrr1 = 3'b001,
+                            eplrr2 = 3'b010
+                            } custom_inst_t;
     // Indicates whether the operands are signed or not 
-    typedef enum bit [1:0] op_sign_t{
-                                    RS1_RS2_UNSIGNED    = 2'b00,
-                                    RS1_SIGNED          = 2'b10,
-                                    RS1_RS2_SIGNED      = 2'b11
-                                    };
+    typedef enum logic [1:0] {
+                            RS1_RS2_UNSIGNED    = 2'b00,
+                            RS1_SIGNED          = 2'b10,
+                            RS1_RS2_SIGNED      = 2'b11
+                            } op_sign_t;
 
     // Functions
-    function func3_t get_func3(unsigned [31:0]ir);
+    function logic [2:0] get_func3(unsigned [31:0]ir);
         return ir[14:12];
     endfunction
-    function func7_t get_func7(unsigned [31:0]ir);
+    function logic [6:0] get_func7(unsigned [31:0]ir);
         return ir[31:25]; 
     endfunction
 

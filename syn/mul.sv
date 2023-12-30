@@ -1,56 +1,44 @@
-//  Module: mul
-//
+/******************
+- The multiplier always performs signed multiplication of 33-bit inputs.
+- It differentiates between the different instructions by "pre-processing the inputs".
+- If input is signed, we do sign-extension from 32-bit to 33-bit. Otherwise, we extend using a 0.
+*******************/
+
 module mul
+    import m_ext_pkg::*;
     #(
         parameter WIDTH = 32
     )(
-        input clk,
-        input resetn,
-        input  logic [WIDTH-1:0] A, 
-        input  logic [WIDTH-1:0] B,
-        input logic [1:0] mul_type,
+        input  logic clk,
+        input  logic [WIDTH-1:0] rs1, 
+        input  logic [WIDTH-1:0] rs2,
+        input  op_sign_t operands_sign,
         output logic [2*WIDTH-1:0] res
-        //output logic finished
     );
+    // Multiplier Inputs
+    logic [WIDTH:0] in1, in2;
+    // Result Register
+    logic [2*WIDTH : 0] res_reg;
 
-    logic           [2*WIDTH-1:0] res_ms;
-    logic unsigned  [2*WIDTH-1:0] res_mu;
-    logic           [2*WIDTH+1:0] res_msu;
-
-    parameter MUL    = 2'b00 ;
-	parameter MULH   = 2'b01 ;
-	parameter MULHSU = 2'b10 ;
-	parameter MULHU  = 2'b11 ;
-
-    always_comb 
-    begin
-        res[WIDTH-1:0] = res_ms[WIDTH-1:0];
-        case (mul_type)
-            MULH:
-                res[2*WIDTH-1:WIDTH] = res_ms[2*WIDTH-1:WIDTH];
-            MULHSU:
-                res[2*WIDTH-1:WIDTH] = res_msu[2*WIDTH-1:WIDTH];
-            MULHU:
-                res[2*WIDTH-1:WIDTH] = res_mu[2*WIDTH-1:WIDTH];
-            default:
-                res[2*WIDTH-1:WIDTH] = res_ms[2*WIDTH-1:WIDTH];
+    // Pre-processing the inputs
+    always_comb begin
+        // By default, assume both inputs are unsigned
+        in1 = {1'b0, rs1};
+        in2 = {1'b0, rs2};
+        unique case (operands_sign)
+            RS1_RS2_SIGNED: begin
+                in1 = {rs1[WIDTH-1], rs1};
+                in2 = {rs1[WIDTH-1], rs2};
+            end
+            RS1_SIGNED: begin
+                in1 = {rs1[WIDTH-1], rs1};
+            end
         endcase
     end
 
+    // Do signed multplication, with a register before the output
     always_ff @(posedge clk)
-    begin
-        if(~resetn)
-        begin
-            res_ms <= 0;
-            res_msu <= 0;
-            res_mu <= 0;
-        end
-        else
-        begin
-            res_ms <= signed'(A) * signed'(B);
-            res_msu <= signed'({A[WIDTH-1],A}) * signed'({1'b0,B});
-            res_mu <= unsigned'(A) * unsigned'(B);
-        end
-    end
+        res_reg <= signed'(in2) * signed'(in1);
+    assign res = res_reg;
 
 endmodule: mul

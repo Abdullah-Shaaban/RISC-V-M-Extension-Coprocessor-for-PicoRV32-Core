@@ -1,56 +1,4 @@
-`include "riscv_pcp_sv.sv"
-
-/*
-task INSTRUC(
-            input logic [2:0]  instr,
-            input logic [31:0] A,
-            input logic [31:0] B,
-            );
-    valid <= 1;
-    rs1 <= A;
-    rs2 <= B;
-    case(func3(intf.instruction) )
-        MUL 	:
-        begin
-            instruction = 32'b0000001_00000_00000_000_00000_0110011;
-        end	
-        MULH   	:
-        begin
-            instruction = 32'b0000001_00000_00000_000_00000_0110011;
-        end	
-        MULHSU 	:	
-        begin
-            instruction = 32'b0000001_00000_00000_010_00000_0110011;
-        end	
-        MULHU  	:	
-        begin
-            instruction = 32'b0000001_00000_00000_011_00000_0110011;
-        end
-        DIV    	:
-        begin
-            instruction = 32'b0000001_00000_00000_100_00000_0110011;
-        end
-        DIVU   	:	
-        begin
-            instruction = 32'b0000001_00000_00000_101_00000_0110011;
-        end
-        REM    	:
-        begin
-            instruction = 32'b0000001_00000_00000_110_00000_0110011;
-        end
-        REMU	:	
-        begin
-            instruction = 32'b0000001_00000_00000_111_00000_0110011;
-        end
-    endcase
-    wait(posedge ready);
-    valid <= 0;
-endtask
-*/
-
-
-
-module riscv_pcp_sv_tb();
+module riscv_pcp_sv_tb import m_ext_pkg::*; ();
 
 	//DUT instance
     logic clk;
@@ -92,25 +40,6 @@ module riscv_pcp_sv_tb();
         repeat (10) #clk_tick;
         resetn =1;
         repeat (10) #clk_tick;
-
-        // //SUB,REM
-        // rs1 = 32'd10;
-	    // rs2 = 32'd20;
-        // valid =1;
-	    // instruction = 32'b0000000_00000_00000_010_00000_0001011;
-        // @(posedge intf.ready) #clk_tick;
-        // valid = 0;
-        // repeat (10) #clk_tick;
-
-
-        // //------MUL,REM------:
-        // rs1 = 32'h0000_0015;
-	    // rs2 = 32'h0000_0788;
-        // valid =1;
-	    // instruction = 32'b0000000_00000_00000_000_00000_0001011;
-        // @(posedge intf.ready) #clk_tick;
-        // valid = 0;
-        // repeat (10) #clk_tick;
 
         //------MUL------:
         rs1 = 32'h0000_0015;
@@ -166,7 +95,7 @@ module riscv_pcp_sv_tb();
         valid = 0;
         repeat (10) #clk_tick;      
         
-        //DIV OVERFLOW by Zero
+        //DIV OVERFLOW
         rs1 = -2147483648;
 	    rs2 = -1;
         valid =1;
@@ -228,7 +157,7 @@ module riscv_pcp_sv_tb();
     logic [31:0] result=0;
     logic [65:0] tmp=0;
     always_ff @(posedge intf.busy) begin: co_proc_Model
-        case(func3(intf.instruction) )
+        case(get_func3(intf.instruction))
 			MUL 	:
 			begin
 				tmp = (signed'(rs1) * signed'(rs2));
@@ -300,7 +229,7 @@ module riscv_pcp_sv_tb();
         if(resetn)
         begin    
             $display("********************************\n\tTIME=%d",$time);
-            $display("Instruction: %b", func3(instruction) );
+            $display("Instruction: %b", get_func3(instruction) );
             $display("rs1: %h", rs1);
             $display("rs2: %h", rs2);
             if(result==intf.rd)

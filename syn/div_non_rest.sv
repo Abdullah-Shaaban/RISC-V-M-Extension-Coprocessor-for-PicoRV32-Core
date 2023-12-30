@@ -211,11 +211,13 @@ module div_non_rest
         q = r_q_reg[WIDTH-1 : 0]; 
         r = r_q_reg[2*WIDTH-1 : WIDTH];
         // Special cases
-        if(zero_divisor & unsigned_div) begin
-            q = 2**(WIDTH) -1;
-        end
-        if(zero_divisor & ~unsigned_div) begin
-            q = -1;
+        if(zero_divisor) begin
+            // Remainder is the dividend when divisor is 0
+            r = r_q_reg[WIDTH-1 : 0];
+            unique if(unsigned_div)
+                q = 2**(WIDTH) -1;
+            else
+                q = -1;
         end
         // NOTE: Can't have zero_divisor and overflow concurrently asserted -> ok to separate the if statement to avoid unnecessary priority 
         if(overflow) begin
